@@ -2,6 +2,7 @@ package com.example.githubuseredwin.ui.detail
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
@@ -26,11 +27,13 @@ class DetailUserActivity : AppCompatActivity() {
         val avatarUrl = intent.getStringExtra(EXTRA_AVATAR).toString()
         val bundle = Bundle()
         bundle.putString(EXTRA_USERNAME, username)
+        showLoading(true)
 
         viewModel = ViewModelProvider(this).get(DetailUserViewModel::class.java)
         viewModel.setUserDetailAct(username)
         viewModel.getUserDetailAct().observe(this, {
             if(it!= null) {
+                showLoading(false)
                 binding.apply {
                     tvName.text = it.name
                     tvUsername.text = it.login
@@ -75,6 +78,14 @@ class DetailUserActivity : AppCompatActivity() {
         binding.apply {
             viewPager.adapter = sectionPagerAdapter
             tabs.setupWithViewPager(viewPager)
+        }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressBarActDetail.visibility = View.VISIBLE
+        } else {
+            binding.progressBarActDetail.visibility = View.GONE
         }
     }
 
