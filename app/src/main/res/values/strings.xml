@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Git Hub Users</string>
+    <string name="followers">1200 Followers</string>
+    <string name="following">1200 Following</string>
+    <string name="tab_followers">Followers</string>
+    <string name="tab_following">Following</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="dark_mode">Dark Mode</string>
+</resources>
