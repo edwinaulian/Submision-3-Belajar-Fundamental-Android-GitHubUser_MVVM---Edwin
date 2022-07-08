@@ -1,5 +1,6 @@
 package com.example.githubuseredwin.ui.main
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -7,8 +8,12 @@ import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.githubuseredwin.R
@@ -16,7 +21,10 @@ import com.example.githubuseredwin.data.model.User
 import com.example.githubuseredwin.databinding.ActivityMainBinding
 import com.example.githubuseredwin.ui.detail.DetailUserActivity
 import com.example.githubuseredwin.ui.favoriteUser.FavoriteActivity
+import com.example.githubuseredwin.ui.settingApps.SettingPreferences
+import com.example.githubuseredwin.ui.settingApps.SettingViewModel
 import com.example.githubuseredwin.ui.settingApps.SettingsActivity
+import com.example.githubuseredwin.ui.settingApps.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,6 +33,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: UserAdapter
 
     private lateinit var sharedPreferences: SharedPreferences
+    var NightMode = 0
+
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -47,10 +58,18 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory()).get(UserViewModel::class.java)
 
-        val NightMode: Int
-        sharedPreferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE);
-        NightMode = sharedPreferences.getInt("NightModeInt", 1);
-        AppCompatDelegate.setDefaultNightMode(NightMode);
+        val pref = SettingPreferences.getInstance(dataStore)
+        val mainViewModel = ViewModelProvider(this, ViewModelFactory(pref)).get(
+            SettingViewModel::class.java
+        )
+        mainViewModel.getThemeSettings().observe(this,
+            { isDarkModeActive: Boolean ->
+                if (isDarkModeActive) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                }
+            })
 
         binding.apply {
             rvUser.layoutManager = LinearLayoutManager(this@MainActivity)
@@ -80,11 +99,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
+    override fun onSaveInstanceState(@NonNull outState: Bundle) {
         super.onSaveInstanceState(outState)
 
         var editor: SharedPreferences.Editor? = null
-        var NightMode = AppCompatDelegate.getDefaultNightMode()
+        NightMode = AppCompatDelegate.getDefaultNightMode()
         sharedPreferences = getSharedPreferences("SharedPrefs", MODE_PRIVATE)
         editor = sharedPreferences.edit()
         editor.putInt("NightModeInt", NightMode)
